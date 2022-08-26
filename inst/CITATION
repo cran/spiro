@@ -1,0 +1,17 @@
+bibentry(
+  bibtype  = "Manual",
+  title    = "spiro: Manage Data from Cardiopulmonary Exercise Testing",
+  author   = person("Simon", "Nolte"),
+  year     = 2022,
+  url      = "https://docs.ropensci.org/spiro/",
+  doi      = "10.5281/zenodo.5816170",
+  note     = "R package version 0.1.0",
+  textVersion = paste0(
+    "Simon Nolte (2022). ",
+    "spiro: Manage Data from Cardiopulmonary Exercise Testing. ",
+    "R package version 0.1.0", ". ",
+    "DOI: 10.5281/zenodo.1040727. ",
+    "https://docs.ropensci.org/spiro"
+  ),
+  header = "To cite spiro in publications use:"
+)

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Import &amp; Processing</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Import &amp; Processing</h1>
+
+
+
+<p>Different measuring devices and analysis software lead to opaque
+results in measuring gas exchange parameters. To make exercise science
+more transparent and reproducible, the <code>spiro</code> package offers
+a standardized workflow for data from cardiopulmonary exercise
+testing.</p>
+<p>This vignette provides information on how the <code>spiro</code>
+package imports and processes raw data from metabolic carts.</p>
+<div id="spiro-function" class="section level2">
+<h2>Import and processing with <code>spiro()</code></h2>
+<p>The <code>spiro</code> package makes import and processing of
+cardiopulmonary data easy: The <code>spiro()</code> function does all
+that work for you. You just need to paste the path of a file with raw
+data from cardiopulmonary exercise testing to the function. This will
+return a <code>data.frame</code> containing all relevant data for each
+second of testing, ready for <a href="https://docs.ropensci.org/spiro/articles/summarizing_plotting.html">summarizing
+or plotting</a>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(spiro)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Get example data</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>file <span class="ot">&lt;-</span> <span class="fu">spiro_example</span>(<span class="st">&quot;zan_gxt&quot;</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">spiro</span>(file)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    load step time    VO2   VCO2    RR   VT    VE HR PetO2 PetCO2 VO2_rel</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1     0    0    1     NA     NA    NA   NA    NA NA    NA     NA      NA</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2     0    0    2     NA     NA    NA   NA    NA NA    NA     NA      NA</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3     0    0    3     NA     NA    NA   NA    NA NA    NA     NA      NA</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4     0    0    4 399.08 323.70 13.94 0.77 10.72 NA    NA     NA    6.05</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5     0    0    5 409.83 330.26 14.50 0.74 10.66 NA    NA     NA    6.21</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6     0    0    6 420.58 336.82 15.06 0.71 10.60 NA    NA     NA    6.37</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7     0    0    7 431.33 343.37 15.63 0.68 10.53 NA    NA     NA    6.54</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8     0    0    8 435.30 346.51 16.06 0.69 11.04 NA    NA     NA    6.60</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9     0    0    9 437.02 348.52 16.46 0.71 11.74 NA    NA     NA    6.62</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10    0    0   10 438.74 350.53 16.85 0.74 12.44 NA    NA     NA    6.65</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    VCO2_rel RE  RER  CHO   FO</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1        NA NA   NA   NA   NA</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2        NA NA   NA   NA   NA</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3        NA NA   NA   NA   NA</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4      4.90 NA 0.81 0.20 0.13</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5      5.00 NA 0.81 0.19 0.13</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6      5.10 NA 0.80 0.19 0.14</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7      5.20 NA 0.80 0.18 0.15</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8      5.25 NA 0.80 0.18 0.15</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9      5.28 NA 0.80 0.19 0.15</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10     5.31 NA 0.80 0.19 0.15</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ... with 2999 more rows</span></span></code></pre></div>
+<p><code>spiro()</code> will return interpolated data for the following
+parameters:</p>
+<ul>
+<li><strong>load</strong>: velocity or power, either retrieved from the
+raw data file or manually supplied by <a href="#protocol-set">setting a
+protocol</a></li>
+<li><strong>step</strong>: coded variable for the number of the load
+step in the test protocol</li>
+<li><strong>time</strong>: time (s)</li>
+<li><strong>VO2</strong>: oxygen uptake (ml/min)</li>
+<li><strong>VCO2</strong>: carbon dioxide output (ml/min)</li>
+<li><strong>RR</strong>: respiratory rate (1/min)</li>
+<li><strong>VT</strong>: tidal volume (l)</li>
+<li><strong>VE</strong>: minute ventilation (l/min)</li>
+<li><strong>HR</strong>: heart rate (bpm), if available</li>
+<li><strong>PetO2</strong>: end-tidal partial pressure of oxygen
+(mmHg)</li>
+<li><strong>PetCO2</strong>: end-tidal partial pressure of carbon
+dioxide (mmHg)</li>
+<li><strong>VO2_rel</strong>: relative oxygen uptake (ml/min/kg)</li>
+<li><strong>VCO2_rel</strong>: relative carbon dioxide output
+(ml/min/kg)</li>
+<li><strong>RE</strong>: running economy (ml/kg/km), if applicable</li>
+<li><strong>RER</strong>: respiratory quotient</li>
+<li><strong>CHO</strong>: rate of carbohydrate oxidation (g/min)</li>
+<li><strong>FO</strong>: rate of fat oxidation (g/min)</li>
+</ul>
+<div id="options" class="section level3">
+<h3>Options for data processing</h3>
+<p>You can control the exercise protocol, the calculation of parameters
+related to body weight and the adding of heart rate data with the
+arguments of <code>spiro()</code> or with the helper functions
+<code>add_protocol()</code>, <code>add_weight()</code> and
+<code>add_hr()</code> within a piping syntax:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Note: The Base R pipe requires R version 4.1 or greater</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>protocol <span class="ot">&lt;-</span> <span class="fu">set_protocol</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pt_wu</span>(<span class="at">duration =</span> <span class="dv">120</span>, <span class="at">load =</span> <span class="dv">50</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pt_steps</span>(<span class="at">duration =</span> <span class="dv">30</span>, <span class="at">load =</span> <span class="dv">100</span>, <span class="at">increment =</span> <span class="dv">20</span>, <span class="at">count =</span> <span class="dv">24</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">spiro</span>(<span class="at">file =</span> <span class="fu">spiro_example</span>(<span class="st">&quot;zan_ramp&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_bodymass</span>(<span class="at">bodymass =</span> <span class="fl">63.4</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_protocol</span>(protocol) <span class="sc">|&gt;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_hr</span>(<span class="at">hr_file =</span> <span class="fu">spiro_example</span>(<span class="st">&quot;hr_ramp.tcx&quot;</span>), <span class="at">hr_offset =</span> <span class="dv">0</span>)</span></code></pre></div>
+</div>
+<div id="use-breath-by-breath-data" class="section level3">
+<h3>Use breath-by-breath data!</h3>
+<p>We highly recommended to import only raw breath-by-breath data for
+several reasons:</p>
+<ul>
+<li>Prior averaging or interpolation happens outside of R and is
+therefore a non-reproducible data processing step.</li>
+<li>If no data for single breaths is available, some functionality of
+the package is lost (e.g. breath-based averaging for VO_2max_
+determination).</li>
+<li>Prior processing usually leads to data containing less data points,
+which hinders the automated guessing of exercise protocols based on the
+available load data.</li>
+</ul>
+<p>If you use a metabolic cart that measures, but does not output data
+on a breath-by-breath basis, read the manufacturer’s instructions on how
+to export the raw data in such a way. Data from other systems (e.g.,
+most mixing chamber metabolic carts) can still be processed with the
+<code>spiro</code>-package, but protocol guesses and summary
+calculations have to be treated with caution.</p>
+</div>
+</div>
+<div id="metabolic-carts" class="section level2">
+<h2>Supported metabolic carts</h2>
+<p>The <code>spiro</code> package supports different metabolic carts.
+The metabolic cart a data file is produced by is usually determined
+automatically, but can also be set manually in the <code>spiro()</code>
+function. Currently this package supports the following devices:</p>
+<ul>
+<li><strong>CORTEX</strong> (<code>&quot;cortex&quot;</code>): .xlsx, .xls or .xml
+files in English or German language</li>
+<li><strong>COSMED</strong> (<code>&quot;cosmed&quot;</code>): .xlsx or .xls files
+in English or German language</li>
+<li><strong>VYNTUS</strong> (<code>&quot;vyntus&quot;</code>): .txt files
+(tab-separated) in German language</li>
+<li><strong>ZAN</strong> (<code>&quot;zan&quot;</code>): .dat files, usually with
+the name “EXED*” in German language</li>
+</ul>
+<p>To only import the raw data without further processing (such as
+interpolation, exercise protocol guessing,…) use the function
+<code>spiro_import()</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">spiro_import</span>(file, <span class="at">device =</span> <span class="cn">NULL</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     time VO2 VCO2    RR   VT    VE HR load PetO2 PetCO2</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1   3.44 393  320 13.62 0.79 10.76 NA    0    NA     NA</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2   7.25 434  345 15.76 0.67 10.51 NA    0    NA     NA</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3  10.73 440  352 17.14 0.76 12.96 NA    0    NA     NA</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4  13.97 582  451 18.63 0.65 12.13 NA    0    NA     NA</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5  17.20 837  677 18.47 1.07 19.71 NA    0    NA     NA</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6  20.39 902  753 18.87 1.19 22.42 NA    0    NA     NA</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7  24.37 391  338 15.08 1.01 15.23 NA    0    NA     NA</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8  28.00 503  428 16.52 0.69 11.45 NA    0    NA     NA</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9  32.06 246  214 14.78 0.61  8.97 NA    0    NA     NA</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10 34.65 728  605 23.25 0.54 12.46 NA    0    NA     NA</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ... with 1987 more rows</span></span></code></pre></div>
+<p>Alternatively you can access the raw data after a
+<code>spiro()</code> call by extracting the <code>&quot;raw&quot;</code> attribute
+of the result.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">spiro</span>(file)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(s,<span class="st">&quot;raw&quot;</span>)</span></code></pre></div>
+</div>
+<div id="protocols" class="section level2">
+<h2>Exercise protocols</h2>
+<p>To achieve the full functionality of data summary and plotting with
+the <code>spiro</code> package, an exercise protocol needs to be
+attached to the data.</p>
+<div id="protocol-get" class="section level3">
+<h3>Protocol guessing</h3>
+<p>By default, <code>spiro()</code> guesses the exercise protocol using
+<code>get_protocol()</code>, looking for velocity or load data in the
+imported raw data. To return the protocol guess after a
+<code>spiro()</code> call, access the <code>&quot;protocol&quot;</code>
+attribute.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">spiro</span>(file)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(s,<span class="st">&quot;protocol&quot;</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    duration load          type code</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1        60  0.0  pre measures    0</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2       300  2.0          load    1</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3        30  0.0          rest   -1</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4       300  2.4          load    2</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5        30  0.0          rest   -1</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6       300  2.8          load    3</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7        30  0.0          rest   -1</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8       300  3.2          load    4</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9        30  0.0          rest   -1</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10      300  3.6          load    5</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 11       30  0.0          rest   -1</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 12      300  4.0          load    6</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 13       30  0.0          rest   -1</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 14      300  4.4          load    7</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 15       30  0.0          rest   -1</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 16      300  4.8          load    8</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 17       30  0.0          rest   -1</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 18      300  5.2          load    9</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 19       10  0.0 post measures   -2</span></span></code></pre></div>
+</div>
+<div id="protocol-set" class="section level3">
+<h3>Protocol setting</h3>
+<p>In cases where no load data is saved in the metabolic cart’s file or
+<code>get_protocol()</code> turns wrong, a protocol can be manually
+set.</p>
+<p>There are two ways to initially generate a protocol: by providing all
+load-duration combinations with <code>set_protocol_manual()</code> or by
+using the helper functions within <code>set_protocol()</code>. Once a
+protocol has been set, it can be used as the <code>protocol</code>
+argument in a <code>spiro()</code> call or attached to a
+<code>spiro</code> data frame with <code>add_protocol()</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># manually setting a test protocol</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>pt <span class="ot">&lt;-</span> <span class="fu">set_protocol_manual</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">duration =</span> <span class="fu">c</span>(<span class="dv">60</span>,<span class="dv">300</span>,<span class="dv">30</span>,<span class="dv">300</span>,<span class="dv">30</span>,<span class="dv">300</span>,<span class="dv">30</span>,<span class="dv">300</span>,<span class="dv">30</span>,<span class="dv">300</span>,<span class="dv">30</span>,<span class="dv">300</span>,<span class="dv">30</span>,<span class="dv">300</span>,<span class="dv">30</span>,<span class="dv">300</span>,<span class="dv">30</span>,<span class="dv">300</span>),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">load =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">3</span>,<span class="dv">0</span>,<span class="fl">3.2</span>,<span class="dv">0</span>,<span class="fl">3.4</span>,<span class="dv">0</span>,<span class="fl">3.6</span>,<span class="dv">0</span>,<span class="fl">3.8</span>,<span class="dv">0</span>,<span class="dv">4</span>,<span class="dv">0</span>,<span class="fl">4.2</span>,<span class="dv">0</span>,<span class="fl">4.4</span>,<span class="dv">0</span>,<span class="fl">4.6</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># attach protocol within spiro call</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">spiro</span>(file, <span class="at">protocol =</span> pt)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># attach protocol with `add_protocol`</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">spiro</span>(file)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="fu">add_protocol</span>(t, pt)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    load step time    VO2   VCO2    RR   VT    VE HR PetO2 PetCO2 VO2_rel</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1     0    0    1     NA     NA    NA   NA    NA NA    NA     NA      NA</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2     0    0    2     NA     NA    NA   NA    NA NA    NA     NA      NA</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3     0    0    3     NA     NA    NA   NA    NA NA    NA     NA      NA</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4     0    0    4 399.08 323.70 13.94 0.77 10.72 NA    NA     NA    6.05</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5     0    0    5 409.83 330.26 14.50 0.74 10.66 NA    NA     NA    6.21</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6     0    0    6 420.58 336.82 15.06 0.71 10.60 NA    NA     NA    6.37</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7     0    0    7 431.33 343.37 15.63 0.68 10.53 NA    NA     NA    6.54</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8     0    0    8 435.30 346.51 16.06 0.69 11.04 NA    NA     NA    6.60</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9     0    0    9 437.02 348.52 16.46 0.71 11.74 NA    NA     NA    6.62</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10    0    0   10 438.74 350.53 16.85 0.74 12.44 NA    NA     NA    6.65</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    VCO2_rel RE  RER  CHO   FO</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1        NA NA   NA   NA   NA</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2        NA NA   NA   NA   NA</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3        NA NA   NA   NA   NA</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4      4.90 NA 0.81 0.20 0.13</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5      5.00 NA 0.81 0.19 0.13</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6      5.10 NA 0.80 0.19 0.14</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7      5.20 NA 0.80 0.18 0.15</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8      5.25 NA 0.80 0.18 0.15</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9      5.28 NA 0.80 0.19 0.15</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10     5.31 NA 0.80 0.19 0.15</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ... with 2999 more rows</span></span></code></pre></div>
+<p>With <code>set_protocol()</code> a protocol can be defined without
+specifying every single load step. You can paste the pre-defined segment
+types <code>pt_pre()</code>, <code>pt_wu()</code>,
+<code>pt_const()</code> and <code>pt_steps()</code> into
+<code>set_protocol()</code> in the desired order. The following graph
+illustrates an example of this practice:</p>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABwgAAARYCAMAAAAiK3feAAAC91BMVEUAAAAAADoAAGYAOjoAOmYAOpAAU6QAU7QAU8MAZpAAZrYAc7QAc8MAc9MAkeEAnnMAnowAnqQAsIwAsKQAsLwAwLwAwNM6AAA6ADo6AGY6OgA6Ojo6OmY6U6Q6U7Q6ZmY6ZpA6ZrY6c6Q6c7Q6c8M6kLY6kNs6kcM6kdM6keE6nnM6rtM6ruE6rvA6sHM6sIw6sKQ6wKQ6wLw6wNM60Lw60NM60OlmAABmOgBmOjpmU6RmZjpmZmZmZpBmc6Rmc7RmkJBmkLZmkNtmkaRmkbRmkcNmkdNmnnNmrtNmruFmsHNmsIxmtttmtv9mwIxmwKRmyfBmyf9m0Lxm0NNm4Olm4P+QOgCQZjqQZmaQc6SQkGaQkLaQkbSQkcOQrsOQruGQsHOQtraQttuQwIyQwKSQyeGQyfCQ0KSQ0NOQ29uQ2/+Q4OmQ5PCQ5P+Q77yQ7+mQ7/+2ZgC2Zjq2kGa2kJC2kLa2kaS2kbS2rrS2rsO2rtO2tpC2tra2ttu2wHO2wIy2ydO2yeG2yfC20Iy20KS20Ly229u22/+24Ly24NO24Om25PC25P+27+m27/+2/9O2//++vr7VXgDVXjrVXmbVfDrVfGbVfJDVl7bbXgDbfADbfDrbfGbbkDrbkGbbl2bbl5Dbl7bbrrTbrsPbspDbsrbbstvbtmbbtpDbtrbbycPbydPbyeHb0Izb0KTb25Db27bb29vb2//b4KTb4Lzb4NPb5NPb5OHb5PDb5P/b77zb79Pb7+nb7//b/+nb///jXgDjfADjfDrjlzrjl2bjspDjsrbjzdvjzf/qfADqlzrql2bqsmbqsrbqzdvq5tvq5v/xlwDxlzrxsjrxsmbxspDxzZDxzbbxzdvx5tvx5v/x///4sjr4smb4zWb4zZD4zbb45pD45rb45tv45v/4////tmb/ycP/zWb/25D/27b/29v/4KT/5NP/5OH/5PD/5pD/5rb/5tv/77z/79P/7+n//7b//9P//9v//+H//+n///D////4aS2eAAAACXBIWXMAAC4jAAAuIwF4pT92AAAgAElEQVR4nO3de+AlZ33f998isXIlzMrClVoWirCoQLRYGFoBjhxHjdNYsWRjc5FT45hgl7hQt16ULHEqL21CoCnFpatwM2wN64abohRhUnBtV4mdYMduqEXphVaBFpvVBXEH5efd3x/9zcyZM8/zzMwzM+fMeZ7vd77v1x+g37nMPN85Z76fncuZ2TsAAMCwvdwDAAAgJ4IQAGAaQQgAMI0gBACYRhACAEwjCAEAphGEAADTCEIAgGkEIQDANIIQAGAaQQgAMI0gBACYRhACAEwjCAEAphGEAADTCEIAgGkEIQDANIIQAGAaQQgAMI0gBACYRhACAEwjCAEAphGEAADTCEIAgGkEIQDANIIQAGAaQQgAMI0gBACYRhACAEwjCAEAphGEAADTCEIAgGkEIQDANIIQAGAaQQgAMI0gBACYRhACAEwjCAEAphGEAADTCEIAgGkEIQDAtMUH4cMfWeJ8H33e3t7epcGDJ9oPAQCGLDwI919z5FVLnG9XEJ7Z28tTLACotuwgfP9VebJh5/PtCMKHrtrbu3aX8wSAZVp0EB5uI2UJwt3Ptx2E+y/d23vMW3Y5TwBYJoJQ5XzbQVjM89ZdzhIAFoogVDnfVhAWDzz23l3OEgAWiiBUOd9WEJ5ggxAANkMQqpxvGITFmTJsEALAJghClfMNg5ANQgDYlJYg3P/An3riYbPfO/6Un2hv+KyePPKkV/jPbRBIX7y9mNJFV7+hawyvOdzuuuimZh77f/UFVxWvHjPfvtdWPvzjx8vqrn5Fa6ad7wuCsNgg5JRRANiIjiB8+LY9x8V+Su3fftX6qSNPreOijIra8F7DE1WwnGlm4kTSmXISD61mc+SWjkENzLf7tbX3NwXsHbnJfbbvfUEQnui4zgwAYBQVQfiQExQl94fjDz/fe+riN1YPbxKE+ye6Z1IG4f+wHkS1D/L9/qDqLcDO+fa8trOAvYubTbve9/lBWPzFRWUAYDMagrCVg25ItZ5cJcImQXjCn9J6JkUQXryOq2of5Jm90K298+17bU91652c/e/zg/DMqBIBAF0UBGFxzZTi2Nw9xX9/+DY/K6rcOVIe0/Oe2yAIyyk99SPFgcKrvNhZBVKx13L/NVU+nlm9+p5mvtXLO+bb+1rn9RcXhwD3P1Cl7aXubDvf5wVhuYDYMwoAm1EQhOUm06X3en/WW2tVSNa7Q1d7Gb0tpZG7DFdB+Jg3utOt43aVSNWUPvCq9SAe68/X25Jr5ht/bTnj+rBjPatbh97nBWH5Qs4ZBYDNKAjCM3v+KZHnnLA7F2zvVdtX7pbcpCBsZlMl4bXNdPwDkyc651u/wp9v9LVliLljPLOuLvY+LwjPjS8TABBSEIQngn2bjz7vSTetzhst48rLgGrzcfXH5CAMD925x/jcCZVPer9X8B7x5ht/7YkwYsuIK56Mvs8LwnABAQAmUBKEPT+SK6PBu/dQGY2dgTQ8E/8424nmzWeCbbPqgWvbE7i1Y77R15aB5ofYmYu+7xfvHfW+S52SOUQIABtSEIStGPKfCpLuTF8gxbk5VjnXBNGZICW9tF1xN0Xd+cZf207ycfNwg7D8b+5ECAAbUhCE56pTVbou9tKxsehGy8Qg9KfkZE24cdaxHec95s43/tozrfwdNw83CDlXBgC2oSAIq/NWChfd9Mb2M11h0bFlNqB9nM2ZeBhX3oFIdwqrKHXnG3/tid4Rxt/nVnmuN0wBAMMUBKH/k3P3mpveb/ZcHVtmAzouUtYkW2cQhjsjg2OKXhD2vrb/+Gf8fRvGPQCgRUMQHjwUXEWtvgzozEF4bfuhJgjd6XRugzkvcl8ffW3XJu2oeRCEADAXFUHoXVe7jMKOy6i5OnZRDiAIAcAoHUF46OH/wM3CqvGzRTixSgBAi5ogPChvO7gOw9YpI122Okbo/H4hnE7v8bu+k2V6X7vBMcJW5QQhAGxDUxAW9v/q6nhhkRGRDarS9kHYnDXaCsIggN3f/Q2dNdq8diAIe99HEALAXLQF4UF99ekiorp+dO7a6ucTwe8I3ens9HeED/1rT/nL90z5HSFBCADbUBCEX/zAjz/R20c45vfopYlB6L/UOUgXTme+K8s4l6/x5nvthCvL8DtCANiG/CBs7yNsdlq6N6JYOXfkKT9RX4Nm6iXWrg0f6Tj5Zf3Arq41Wj85+lqj/ZdpAwAMkx+EZc/3YqgJwp7nNryyjLcB1reF1zw5390nbu16cvTdJ7jWKABsQ34Qtm8MEV4O200L745Jk2/D1MzFu7Fhezrd9wrsvv1T9LVVuDVXjnPugxh7X+vuE9yGCQA2pCAIqyusPdW/Rf0qZ1Z3kl8HyZm9MJBGHj1b3aG+not/q/t2EA7fob6Z75g71NcTX9XzlqH3te5HGDllCAAQoyAIVyF15KZ7Dv97/8O3eVm3ug7p1W+4tzirpvppxToUztUpec/IeeztXXRLMaHXXNUKtq67Pe0deWox5dWQmugL5ht97eqiAFUBqwvo3Do4D+5QDwBz0RCEze0n1po9gedazzWZsL5a9/D20onWZJzpdO1iPdN6fXOYLpxv7LX+JcX9J/vf5wUhBwkBYAsagvDg0ecHeeAeEQuDxEmsdYIOby+V54j+Ry/tnk7nscb/zp/vkVuap1rzjby23ufZGZK97/OCkFvUA8AWVARhcNHti27xn3yNmxVPdc8aWSfo4IHC6scSzqTc6XSfdPPwbX2zbc838tqguou9Wy72vc+/uFyxVcxBQgDYjI4gPPTBHz9eniRz/M+8sfXc/gf+1BOLqDh+9Staz7ygfOKW1nsC9a8GH76tmNKTbvKyqu/s0y/e/oJiTBc95RXhOZvt+fa/tvCB246Xr28X1/0+PwjLv/hJPQBsRE0Q7lj/reI16LitMABgHIKwojsIi+Ok7BsFgI0QhBXdQdh1O0UAwCgEYUV5ELJJCACbIggryoOwHD+nywDABgjCivYgLDYJud4oAGyAIKxoD8LyJx5sEgLAdDaCsOMiba5LFxCERYkcJQSA6QjChQRhuXOUE0cBYDKCcClBWOwcVV4BAORAEC4mCIsauLwMAExlIwgBAOhBEAIATCMIAQCmEYQAANMIQgCAaQQhAMA0ghAAYBpBCAAwjSAEAJhGEAIATCMIAQCmEYQAANMIQgCAaUaC8Gt/nG/e950+/Y7uZx48fej3djPXpuLD+Z/+u//PdlM7HOmdf7jtkABAJBNBuP+pjF38/v4M2V0QuhXPEYT7/+z06bd/YdtRAYBEFoLws+/MuDnz1XeePv2+nud2FoRexXMEYbQMAFDNQBAebpLlC8JiU6o3hXYVhH7FswRhbMMWAFQjCHc/896o0xSEj/4jdo4CWCaCcKfi8ZEmCGecKDtHASwQQbhT90WTTlUQRnfyAoBeBOEuFaeYRPYnqgrCcqo9vwMBAMUIwl2KbxAqC8JiNy/nywBYnkUF4dc//cuHEfDW93zGe3SDWOieUGX/U4ebeW/9RLOdt/+53ylefee7Pxlu+xUbhK29iZ/7ncNHT5cvnhiErTl//g/eVUzr9J3v+qf/t/vCgYr3//ffLt721vaAV/X8dvH+93wyfIJNQgCLtIggvK/q0EWjrrytbuLFVsza8EmP/RM6qB59+xe++s7qmTt/t3p0/9PvXL/6zvd+oWtyrs+uX33nJ90gLI7AeQMsR/6OyJzLWGzUI21XHJw1+rXfd17gDvi+6myYZoRvC7K0M9cBQLvlBOH+fW4urM5v3CQIOyd0sIqj/28dE1WAfe0fuy8+/TZ3y6y9L7GMu2bSk4IwmPNXvRgsQ62nYj8IP+u/zxlfFYSfcp/1t1bLMXLiKIClWU4QevFVN+xNgrBzQgdVHL1tnXtVtLTiyA2++8N5+jl4+vQ/mRCEwZwfbOXgakoDQXh/97vq4t/nPx/sX20VBAALsJggLPv2e/+4OL73zlgsbDihg3WG3PmJLxzsf6rKx2ryd5bHEj//+05AFsps8/aMVlN4W3Fo7vPrHZQjg9Cf86qu93ymeMfXP/ePm1nHg/D+VXl/1Ax4XV/xul95Zz2+apL+jt0i9jldBsDSLCkI/+5qv2S14eVtBI1s39EJ3e9uJH3uD9fPr3eHVrtJ19lRbi26Oxerzcf3eX9NCEJ3zvcH22v+371Xlqnm+XZ/wHV9q+L/3hecSfqHBMsxsW8UwMIsKAiDbbF1x54chD0TquLIzYEHg+3Mamvs95xnvfne57//q+4G54ggdOZcjcsN2fv6K3aC8L7OAb/PLX6d4+15VC9h3yiAhVlQEDo9u8yYtzubNpOCsGdC4VZYFRXelMuX11ESpoY3qMKDk4LQnVFrUtW0hoKwfJu3kec+cl+wCXh/mPuZL9sKALuxnCB8R/hI3bGnBmHfhO4/3ZVsXlKUcbbKktYhwvvDLSx3m2s4CL3c+/r/8Qe/7M3ZG0tfEHZE233NEMLi2+Xt9E7CAJDJcoLQ68/uBtLUIOyb0P1hSnZM2Am71gG19l0gnFcPB2H8p+ze3HqC0I3pmrMNGxbvbd46D3GQEMCyLCYIO07rcGJkQhD2Tqi1PdVxfyMnKcJzZVpR571kOAjj+TMmCMvXBIf4nMfCIHRH0P8QAGi3mCD0G7ybKxODsHdC4a7NjmRzkyLcjdiXK2ODMLJHcv///QPvhNSeIOzYxHPT/L5gOXUMuKtkAFBuMUH4jvZDq621iUHYO6Ewjrxf7Lma3Gyd4OJv1m0dhPt/9H/+L7/zrvWMxwRhuGHZxB9BCMCmxQTh+9oPbRaEvRMKp7N9EJa5MjII2xWU18b2DARh56kuzWvDPb1d+0Hnuds9AEhCEI6e0Ogg7H75zEH42Y5rrBGEADAdQTh6QpK2CPc/5c3x3Z/4/IiTZQhCAOiwmCDsOJg1xzFCZ0KdQdh/CuVOg3B9YfB3/ZN//n/98cG4s0Z7jxE2J8sQhADsWXIQbnbWaO+EwukMnDkyIjdjJ8u4p3i2KqiuzvbW3w0ulrbBWaNO0BOEAGxaTBD6ibTF7wh7J9QZhP2pMCI3Y78jjAZheM3QcVeWGfE7woEg5KxRAAu0mCD0o849HDYxCHsn1JpO/Od9rSNy0Ym3IqZ8ricIy4jqmNT2V5YhCAHYs5gg9A9+bXOt0b4JtabjZlX90J2/8s8/U/1n64jcg50Td4PQjaH7IkHYvua2f6HQza81OhCEXFkGwAItJwjdHu4dDZsahH0Tak2nvWFWXUb7Hc2z7wtf3pq4G4TOtKpTUkcHYTWpoSAcvvvEQBByrVEAC7ScIHR6tn9fwMm3YeqZUHs6rXvXuvdLau9GDG4isfr5xe85s24yxhvJ4K7Rr/0jb+AT70f4jtbrmieDDd7ozmAAUGlBQXj6vasOH9wpfuhKnWMn1PFrvuoO9vUN31c30HXvR+htflWx83Zv4uuRuTcnPNj/307HgrCabxNo9Y/r3ZE2FU+5Q/1AEN4flgQA+i0pCKvfE3z9U+/0N9QerNPqj7abUMeW5eom8+/5TPHyz1XJtn596w71q7C78xPFqz9dXxlmFVir7cP3/vFhzn32lw//6139QbhK3Ds/UfyC8I8+/curKa2j0a/YDbjVG99bPPH53/cGMCYI3bNqy9q5Sy8A/RYVhA6nQ3+1jpzhbZnohLp2sT4YeX3rIGGdQ2v/ffM7wtak3nF/JAirTcKWukC/Yi/g7m+9aT3C4SD0KiIIASzEYoLwzv/VDYf2jsRRXTs6oc5jjV8NLvnpvKB1i/pD/8J9+TsedYPw4FPudN57EAvC1uXd7vyEe56sX7EfcP/CH/Cdv+sVHw9CbxuXIASwEMsJwj90rr/5Xv9H8aujccMHCqMT6j7pxrvq553ejB883d4KrY8Mni42rfwgdK6jXcRTNAgP9n/fi8Ev+OexeBUHAfc1553eeIeD0LveAEEIYCEWFIRFjy8Ol737E+EvvverOxa963c73z12Qn1nn+5/7nfKo3Tves8n/SeCnFuppv3W4vhe6wWf++0iXd79yS8cDAVhcZSxvBHhne/+p59Zz2ydUm7FrZN2vv7pcjZv/ZVPtn6KGA1Cf18vQQhgIRYVhHIm1ExuQT8/b23h3k8QAlgAgnAnE6oUG00L+rVB6yZV9y2pOgBmEYQ7mZAzvcVciKXYM+oF3/4/IwgBLABBuJMJrSxqk/D+MNUPq1vQjl8AZhGEO5mQO8GFXJKstUFYFLeQ2gCYRhDuZEK1YpNwIbctCjcIi9+NLKQ0ALYRhDuZ0Nr9S9kkLDYIwxtevG0pe30BmGYpCHsuTFZ7xy6CsJjnIo4SthP9U+9lexDAEhCEuw3CcufoAk4cLcrgzBgAi0QQ7jgIi02pBfzs/D4OCAJYKoJw10FYTFT9ttSDi0hzAOiyiCAEAGBTBCEAwDSCEABgGkEIADCNIAQAmEYQAgBMIwgBAKYRhAAA0whCAIBpBCEAwDSCEABgGkEIADDNSBB+87cSz/DUsWNXdj/zyLFDL9nNXJsyD+d/7Dvespu5lP7lnz/WW+IWdrl0oppFdziEy38+wwgA5GIiCM+/LnVnu7u/me6u1btlEoSTuIvu/MuPHfvOe5MPAUA2FoLw156Z+p/433jmsWM39Dy3s1bvlUkQTuF/Q2KfHoAFMhCEh1tniYOw2KboTaFdtXq/TIJwgvAbEtmeB7BABOGO5tjbzAnCGBFBWNTGzlHADoJwfvE+miYId27JQVg+wM5RwAyCcH6nor2cIIyREYTRfdsAloYgnF1xrkVkxxpBGCMjCMtH5i8OgEwE4eziG4QEYZSQICyq43wZwIpFBeG3Xv/dhy3tiue82Xs0cUIUG4St3Wof/eHDR489+9X3Tm715193+M4rXtRsYf7Gz1xfTOvY5df/2C+5Lxwo8/zf/qHibVeUY+h4+qM/VLz/Oa8eO652EEbn0Dfq0uZLp2P5nP/oDxffgss7hrF66tj13/Oz3nMdi45NQsCQRQThqaprFc2r8oS6n5ftuhY/EbA4LuQmWOffV67+351UEAmn2i30155ZD+HyV7utPjqpu8vnvrF66+Uvrt7xumc6Ba3rbJcZnDX6zZ92XvBcZ46nqtNCmhE+YeQ/GcIg7J1D/6gHls6AzuVzcP71zawu94fhjfDYE97s1NH+hnT+cwbAMi0nCM+fcvvc6py/CUFY5WjTg6u3Nn+XLfclg0HY3qlWvqEZ2KQg/J/Wbf0l6zF4nttTph+Ev+a/zxlfFYSvc58dtz0WBGH/HPpHPbB0BnQtn4Nv/gVvPk9wtj5bo7ihZ9E1w+LEUcCG5QThqQltrlPZKZve94gzmcLdq2gZCMK7wxn5nf7YsR9p2vZgED5h3dfLUHuklSirKQ0E4d3d76oX3Q3+8+N2I7er7plD/6gHls6AjuXTDrumlnYaV59t3zek9TkCWKzFBGHZ9p77W8WBwmc2vXZKEAaxdMp/T71ndCAI1y9bqzLiCcURq99Y75wbGYRFTS+69+D868qmvSrmOW8u3vGtj/6FJgHiQXj3auH85kEzhDpritd9zzPr8VWTHHVszKs6Nof+UQ8snQHt5bOa1eXlMeLV1OoZVYF7xYuKEZ53n+v7hhTByekygA1LCsLvWO0Iq5qe12tHtTRvK2q1qbL+u2yYLzkYCsJ6B+patSVyg/fXhCBcDfyjP18/4lTi/917ZZlqnt9Z7yWs9h7Wda0W3b97rzPJUcfG3KFG5xAddWzpDGgvn+oje4I/DHeIV3qHAJv5dn1DyvrYNwqYsKAgbPp31RFjba6Td3xq1ZTXb3yk/iMehI+EMzt1zGuo33A2V8cEodOKq6rckDjVX6YThKeCbZ1qG+gGZxLNNmB7Hn3cocbmEB91bOkMaC2f6vNrDeMl61e7Af+IW3bnN+TUMfaNAkYsKAid9lk21O90tnJGBaG3EVAdImz+XvfFeBCG7dMbSTPdsUHojrs1qWpaQ0FYvs3byHMfORVsAt4dpksfZ6jROURHHV06A1rLp1ya7bN0rlzX6S/pZ79o/Subzm9I+kvUAshkOUF4ZfhI3cXGdzS3Wxb//WPPXE+2CcloerUOEd4dNnZ3C2k4CL0E+dZ/+TPf7WWUd3pPXxB2RNupZgjhogvOGOrnDDU+h9ioo0tnQGv5tIfu/AImehHyzm9ItlsEA0htOUHo9Sx3W2l8EDr7z4o+/x3/TXP17ObciWh6tY4stRuw0/yHgzB+3oo3t54gDH8OWRfjbCm1tqXHnC3TDHVgDrFRR5fOgNby6flZfDW19j8r4u+c8E8CANotJgj9fhomyrggdM50KS8Y+j+/fP3O5mz6aHqF58q0Xuy9ZDgI4414TBCWrwkSwHksDMLRV05rXjgwh8io40tnQGv5dGz0NWFW7XO9PLjokDOp1jdkR9eQAyDPYoLQ76duix0fhM6OzepGPOvLhjq/r46mV7g/raObrk8/HROEkUg4/w9/JnLq4zoVOrfNmsw4FSycDYJwYA6RUceXzoBw+XSkarjZWrriRa1rvHV+Q7qmB2CRFhOEV7YfWjXiCWc9NNt9VQQ+4jb71TQG06t1gou/Wbd1EJ7/zb/zV374+rqvjwrCcMOyib+5grB/DpFRx5fOgHD5eD8IdFUL2PtBfXAdUoIQsG0xQXhD+6HpQbj+8UN5iPAtzR2VnKOH2wZh+f6RQdgednltbM9AEHae89G8Ntxy2yAIB+YQGXV86Qzouq18JAgPvhFcfe3V/ZOqRM+vAbAgBKFrvT3ySNVAV3nobXPmDMLgip5KgrB31GmCcH1xmdf742guL04QArYRhK23XXlQHyJc31vQ3WGXLwjPe9fGPvbsF/3GiJNlsgdhZNRJtwgL3/wrbhb2XJSnRhACViwmCP3m7Z7SPyUIVwcJz9eni64C8RF3wyJbEK4vK379j/zsf/Vb9cs3PUbY/fu6OY8RNnPoGfX8QTg88vPVzQ9L7lXgCELAriUH4eSzRtcnxax3iX6j+km9O4NWerlnTY7ozrGTZWKTWp3uccWLg2uIbXDWaOSH5jOdNdrMITbqrc8abV1YZtzJLef/9up4YfSXpgQhYMVigtBvgZv9jnC9QbI+W7RKRG8zZVJ6TfwdYTQIwyt6jruyzIjfEW4ZhPE5xEa99e8IW4t6dHBVV+SO/VOJs0YBMxYThH4jc49bTbpo5N1le7/bbdWX/7x3u/JWg3Sv39w6XhYdWnRSnRuXHZPa/soyWwZhdA7xUcc/uLjWxxr94eW3Phpc6M2Nb4IQsG0xQegfa9rsWqMHq9NFgyvK3ODdpLXV993LdbaOej3SOTQ3CPsm1Xm40W/M3oVCN7/W6JZBGJ1DfNTRpTOg9bF6N5RYPXT59/xseS2Z9u7bwZ3nXFkGMhzVIfdi2s5ygtBt517fmxSERfu7/D9ptgCL7vqvvtxt1+FNDqqzFa90/rghmF57aG4Q9k1qOAirSQ0F4fDdJ7YNwtgc4qOOLp0BrY+1vfFZXU6me8N0MAi51ihkyJ1wI+VeTNtZThA67du9Ed3U++kU0/oRP9mu8G9WHmx/ejNv708Lrva8Osn/JcOTGtw1+s0/75U98X6EV7Ze1zw5MQhjcxgYdXTpxLU/1rvDfw85d2pq3aBk8LLs3H0CMuROuJFyL6btLCgIjz131VC9W5NPuaFBIbgPYX2NSqfNe/fMO/+3jnlx1DrVsOrt3+kNbf3u2KQ6TwZxxlH/TN0NwqbMKXeo3zoII3MYGHV06cR1/M6ynNd3/JL7Cm+rdf0NWf3t7jzv/CUkJ40iv9wJN1LuxbSdJQVhdZL+t173TH/L4JG6Pf7mmGmFd6Y/5eViYbXZ8tzfOmy9v/bdh/91vZMdrTvU1/c9eFExtPW1TV4yPKnuk0EOJ1T8Fu83X//dqymtU8Qv0w241RufWzzxGz/tZ000CL20CHgvjMxhzKh7lk50/l2bcavP7jlvLqb20SpV3cQvZlQM8fxqjO6H1vqGuKciRwcC7EzudJso9+La3KKC0OF0rfXllkf9+361Cbh+7SPh5JqNxpUr73Z6ausgYR0Fa/+O+0u5yKRajb65gYKnHqlfphdwd7fetB7hPEEYmcPAqKNLZ2oQhovTfUXHONbbqV3fEO+DJAiRR+5kmyj34trcYoLw8v/05V3978BpgePvzuu0+NVuP++8R++iYc89cIOwdYv6Q//Ava7Xlf5Pxvsn1W704UXELn+Re3KsX6YfcN4IDl/xYm/RzRCEkTnERx1dOpOD0L/HhP+Cf+lfdNv9TLu+Id6mPUGIPHIn20S5F9fmlhOEP+9c1PK5Xm6tW+CoY0/f8O7y55x56GguI110fDcIvaux1b7Z9OAbwmun9E6qo9Gf/2kvUO71T+jwygwC7pvOOy93l85cQdg/h4FRx5bO9CD0r2wajMO76PYVL3ae6viGeBdpIAiRR+5kmyj34trcgoKwaMbFMahnvyj8FfT56jZA17+4892B8DzH7l+2ffSHit5Y3dfOC8Lua4RVI7uiOFLWekHPpDob/bdef33Z4Z/9Y29ez6z5haNTZuuknW+9vpzNFd/j34pvtiDsncPQqCNLZ4MgLC8mWh6JvP45r2499w9/5vpyktf/2C+Fbwq+If4uboIQeShJGCXDjFhUEIrQcZdgxe7OvGBzzb+1YZ97QcAkJQmjZJgRBOHcvOuxqXcqcy255t+6s1fuBQGTlCSMkmFGEISz67g7olrnX563/+ea//r2I7kHAtuUJIySYUYQhLNb0ibhYS1Zd/Pmmv/d4T9mci8I2KQkYZQMM4IgnN+prtNldDqVuZJM829tEGZfELBJScIoGWYEQTi/YpNwEffvKX6LkLOQbPMPNwhzLwhYpSRhlAwzgiDcgbsXskl4mOhPyLmPN9f8iw3C8I4ZWRcErFKSMEqGGWEpCHuu9lWb7xhQMaNFHCV83XPzbgZlmn/7HzK5FwSMUpIwSoYZQRDuIAjLnaNLOUKObw4AACAASURBVHHUnuLT48wYSKAkYZQMM4Ig3EUQFtsUkvbVYopTHBCEEEoSRskwIwjCnQRhMSQ2KnR6hH/EQAolCaNkmBGLCEIAWCAlCaNkmBEEIQDIpCRhlAwzgiAEAJmUJIySYUYQhAAgk5KEUTLMCIIQAGRSkjBKhhlBEAKATEoSRskwIwhCAJBJScIoGWYEQQgAMilJGCXDjCAIAUAmJQmjZJgRBCEAyKQkYZQMM4IgBACZlCSMkmFGEIQAIJOShFEyzAiCEABkUpIwSoYZYSQIv/zrkiYz6OTRo4/vfuaB4uv2o7uZa1Pd4fyPftsu7yz8J997tLfELYxfOjuvMKNU39KNZBpcM9vD78glP5dlDJtQkjBKhhlhIggvvHaWr/5Mkxl2tn9d3V0QutURhHol+5ZuItPg3Nle+ItHj367mttNKkkYJcOMsBCEH3ryLP8GnGkyw7705KNHn9Xz3M6C0KuOIFQr2bd0E5kG5882tnqJoyRhlAwzwkAQHm5fzbH6zTSZYcU/WXt79K6C0K+OINQq2bd0E5kGF842ssNFHCUJo2SYEQRh4smMm1FvMycIYwhCgnB4tsWXT8vOUSUJo2SYEQRh4skMiq+maYJw57IH4VIRhCNmWzygZOeokoRRMswIgjDxZAadjPZygjCGICQIR8w2evBBFiUJo2SYEQRh4skMKQ7lR/bbEIQxBCFBOGa2Z3fy7dsFJQmjZJgRBGHiyQyJbxAShFEEIUE4ZrbF10/sUvIoSRglw4xYVBB+5Re+6/DDuOwZb/Ienbj6XbjrB4qpHL3m6T/lbZh1TWb12kue9srObbju8UTmUW0Qtvba3PUDh48eLWcysdVfeO3hOy+7uZnJx37ymmJaRy+55gf/66Hq3On8je8v3nZZT6EX7vr+4v3PeOXYcbWDMDqHvlGXNl86vkgRh/MvP66O51pLeOA7cXDXy8o614WsZtvx8oEpdY53g6zpL27gU4+Za3BTFu+ENVfNJqGShFEyzIhFBOHJ6mt9tv44jj6uXv/Khlsbc6bYl1/mvOHo494Um8yFX3jy+sFLrnMm3j+eyDy8t7o+tJ7LJa90W31xpMOryU2Xs+VzX1q99ZIXVu947ZO9Ob+yr7rgnEpvwGGhz3JH+LiRbS4Mwt459I96YOkMcCocLOJDzvwvWffkziXc/514oFq2d/3poMxfbcb/Qr/s2Lerc7yTv+z9xRX6PpPo9262wU1cvNPW3O5/b0pUDz33OAYoGWbEcoLwwkl3RVidFDZ19fuS13PX0+mczJf/tPfKxzXbKv3jicxjPSP/H69l22leOikI/8f1nH60c8ZHr+upzg/CD/nvc8ZXtb3Xus+O2x4LgrB/Dv2jHlg6A1pB2FtE8DEffdxb+pdw5DtRBeFZ99nDRR2Mv3+2wberc7wbBGFfcQeRz2REEM4wuImLd9Kau6pBw4mj9dBzj2OAkmFGLCcIvdwZWA/6tJtuNZ2uybRe6/8Mr3s8kXmUzobD9Dvl0aN/rvifkUH4uHXbKFv+A+0ZV1MaCMKz3e+qC32W//y4XV9+EEbm0D/qgaUzIAzC3iLaH9fqbR1LOPadKIPwr/vPPisYf2y2/rerc7zTg7C3uNhnMhyEcwxu4uKdsubWk9fwW8J66LnHMUDJMCMWE4TlenHdrxcH5p7crLfTVr+qL11288eL//7Yy5pVsGMy1UOXlMf/3JfGxxOZx/pJb89o1VMeVxwQ+dh638/IIDxa7ey68NqyJ6xqeMabind8ZbWLrqc6NwjPrkr5eFPouicWr3v6k+vxVZMcdejFC8LYHPpHPbB0BgRB2FvEav7lcxfucp9sL+Hod+IB9ztxodrc+rY/W096tV8vmG3/t6tzvJODsL+42GcyGISzDG7a4p2y5paK4NRwukw99NzjGKBkmBFLCsJvW+0pqdYKr1uO+86X/6x8vHcgodlc8ydTzWO9b6baZ1P3sdh4ovMo/3IbecfTRycE4Wq8d/1c/YizHPy/e68sU83z2/1C62W7KvTfvteZ5KhDL+5Qo3OIjjq2dAYEQdhbRPlkc/TubDOH9hKOfidWQVg/u27Q7tcr6Ovxb1f3eCedj9JfXOwzGQzCWQY3bfFOWHOdMSvYN7r6lkhPGCXDjFhQEDYduFplYutBt7NBH3/A7T/+ZMqnnG5QNbYfHR5PdB4PhEM96Ray7vWjg9BZ06sxuCFxsn8hhTHRKvRZbqHr7Zj2PPq0emfPHOKjji2dAa0g7C6inGRwncrVa1tLOP6deCD4Tqy2eJr3nwxfHP929Sz0KVkTKW7wM4kH4QyDm7Z4J6y5B81AFewbPbqSexwDlAwzYkFB6DTAchX/dudfpeNWv3Dl+JPvfdrN63M6vcmUK3j7nA6vG3SPJzqP8EmvjsIDk4LQHWBrUtW0hoKwfJu3kec+ctJv7tVcx/w72xlqdA7RUUeXzoAwCHuKOBkWVA68fHFrCce/E+HYVttc/lErN2ri366+hT4la/qLi34mw0E4x+CmLd7xa270QXmUJIySYUYsJwgfHz5Sf82nBWHvnj1vMuU66HX8cj11W2vPeGLzaB0iPBs2dvdf2MNB6CXIV/7zn/wub8ReDX1B2BFtzqZLWGh7sfRwhhqfQ2zU0aUzIAzC7iLKYfrbDWcv+/f/5r3rubf+1dL7nXggSAh/r8VBO+FHf7sin2NUpLjoZzIchDMMbuLiHb/m1pRce0FJwigZZsRygtD7UrtbO9N2jfbuL/Em0/MbXTcfesYTm0frwEV7/XbmMhyE8fNWvLn1BKHbgGvBP8RbW75jzpZphjowh9ioo0tnQBiE3UXEgr21hOPfiQeCl7c2cIKEH//t8pbWhKzpLy7+mQwH4QyDm7h4x6+53sDkHyRUkjBKhhmxmCD019swE8atftXuq0vaV4JpTabjX6DOmhUbT2we4bkyrZbjvWQ4COPr+Zgg7NhqcB8L297oK6c1LxyYQ2TU8aUzIBKE4dZqz/RaSzj+nXggeHkrbKLfn/DZ3oU+IWv6i4t/JpOCcNPBTVy849fczoHJpSRhlAwzYjFB6K+37so6fvVrftZ12c2tS3m5k+nowe6aFRtPbB7h7pqOlbV8aGwQRiLhwt//yciZdeum07lt1rSkk8Gi3SAIB+YQGXV86QwIgrCniPApV7iEB74T4WcbCcIR367ehT4ha/qLi38mg0E4x+AmLt7Ra250egIpSRglw4xYTBA+vv2Q88vnKXuLasHVDN3JeL9OcjUbSr3jicwjHGnH7putg/DCx/+Lv/QD16wHMCYIww1L/4DnHEHYP4fIqONLZ8D4IOw79BQu4YHvxIQgHPHtmisIu4uLfyZ5gnBgoYxdc9cIwjkpGWbEYoLwWe2HpgfhwZeCazg517WcGIT94+mfx4ggLNffkUHYLrq8ErJnIAg7TyloXhv20g2CcGAOkVHHl86AIAi7i4g2y3AJJw3C3oU+cfdHd3Hxz2QwCGcY3OTFO3bNbUTPrxGjrif3OAYoGWYEQehzr+pbrlDrN44KwmaPYf94+uex4yAMrh5Zkh+EvaPWEoTVtOcIwu4zJI0H4eBaRRDunpJhRhCELV/+S+4a1Xmi6FZbhP3z2GkQXvCuhHz0aTd/bMTJMtmDMDJqLUHIFmGKLcLCiDW3QRDOSMkwIxYThH77ddvMBj+dvVDd467kXuzLC8L+hh8fT/88dhqEJ+uZXfPnfupv/nr98k2PEY7YOIkZcYywmUPPqHcfhIPHCCccH50ahPFv1xxZs8ExwnEny+wuCIe/WkNrbkc9oilJGCXDjFhyEE4+a9SfxN9YHXVYdYShs0ZHj6d/HiNW/tjJMu7Jfq2iq7MJLnthcImqDc4ajfyOeaazRps5xEY951mjMwThwHdiy7NGu4cejnfOIOz9TKLfu50F4YSTW2JrboMgnJGSYUYsJgj9dWSz3xGGquv6duRp1y+OR4+nfx4jVv7Y7wijQXjyaDitMVeWGfE7wi2DMD6H2Kjn/B1hTxEd595+6d94+n/48fq51ofV/52YGoTxb9ccWdNf3MTfEaYLwtHB1bvm+tPjrNGZKBlmxGKC0P+mu21n/Or3lbuC63m5HaF1ZZn+jhsbT2werWMz0cJaq7J78ZLOjcuOSQ0E4Ygry2wZhNE5xEcd/9jjxgVh+Ct496HW1yr+nZgQhCO+XXNkTX9xE68s437vdhaE8YUyfs2tEYRzUjLMiMUEob9Kuz1y9OrX3iPUu4c1vGBW8dAlT/+pNw2OJzqP1rGZdq9yrtzRalcnI0HYvnq19/K+IOy6Qo0zhBmCMDqH+KijS2fAuCDs2DRaz6L1tYp/J6YE4fC3a46siRQX/dSj37vdBWFsoUxYczsHJpeShFEyzIjlBGGrqUxe/drbH72rU89LnQ2lnvFE5+EdtVs/0JqQG4TOpKrz6kYHYTWpoSAcvvvEtkEYm0N81NGlM2BcELaTtRlb62sV/05MCcLhb9csWdNf3PDdJ/q+d7sLwthCmbDmegWFJwTJoyRhlAwzYjlB6DTgatWcfhe0k/5kYtfuPhtmXfnA6vnYeGLzaO+uKafaPLI6h9y9MV2zLntzHdw1+uXv9QbZF4Sto3Tj215MK2y65zAw6ujSiRsZhFX/by7a5dwzov21in4npgTh8LdrlqyJFDf4qfd973YXhNGFMmHNdV/A3SdmomSYEQsKwqPXrVZc/4beA0dcXNUWxXX3en+7e1ibyVRNo+kiZ8Nu0Dee6DxaZ7JVDejbvQkF93pd/XHhrx8NM6J1roHT2uqfqbs9qqnOGcfqvnn9d6jfOggjcxgYdXTpxI0MwuqjXC/I1ae+3mkc/FIz9p2YFISD365o1ozu7/3FRT/12PdutsFNW7wT1lzn3fJPGtWSMEqGGbGkIKxOs//Ka5981PuSP1CvPx8fOaFLbi5eeeFjL/OiIpjM6uKGz3hTMcu7qh7s5kPveIbm0XH6x+GriwmtL52xWqlXW0DX/frhhD70XYf/dc3R3iBctY1Lbi5+i/fxX/iu+ptbp4hfndvOVm+8rnhiNdx1V4m2Pa8ZBdr9sXsOY0bds3Si8x8dhKtlXH3Mq1k0N0UPph77TkwKwsFvV+94u76lvRth/cVFP/XY9262wU1cvBPW3OYN8s+V0ZIwSoYZsaggdDjr0Pp6vMP/AGwuYr+2XlnCyTzQP8/oeGLzaB0krDvS2r/l/lIuGMLji9f2BWHHbN1l4lfntbOzrTetRzhPEEbmMDDq6NKZJQj9qzm7Y+va4Rb5TkwLwqFvV3yhN4soHoT9xUU/9dj3brbBTVy8U9bc9bjkHyLUkjBKhhmxmCC85D92V4X2XsFoQ1j7E//Sve4/GluTCbuIf4itfzxD8wh2Lf6qO5vH+z8Z964/dt1BLAhb16i65Gb31Fq/Or+d/apf6CUv9Bb8DEEYmUN81NGlM08Qrve41uru2X8Khjvc9QsmBuHAt6t3vMG3dCAIe4s7iH0mse/dbIObuHgnrbkHXfteZKqryT2OAUqGGbGcIPw557KU13n7PNbryIjDE/6ley9z1/7WZLzrYF7izHNgPJF5PHC0veHqNKtnhddOaa5IXTSqaBAeXHiZO9yb7/V7s1dd0M6+7LzTrXO2IOyfw8CoY0tnpiD0P67HeYeo2lPv/U5MDcL4t6t/vP63dCgI+4or9H8mke/dbIObuHinrblq9oxqSRglw4xYUBAWq25xxOJpN4df8AvVjXyueWHnu0N//yevKdfQa34wuMVnezIX7vqB8rjVNc94pfvCofH0z6P7GmHVdC4rjpS1XnDX9xcTqu7AFg/C4jhQeUu/S572g29az2zdDdzqWiftfOUXytlc9nT/Tm+zBWHvHIZGHVk6cwXhobteVg7B+7T6ToHs+U5MDsLotysyXu9bOhiEPcVV+j+T3u/dbIObuHhL49dcLXtGtSSMkmFGLCoIpdhiPCdbTVizs5k/ltzzl0D0Msg1uK49LyIpSRglw4wgCHdgi/EU/0pWsYaOcjJzLbnnL4HoZZBrcCeVbBBqSRglw4wgCHdgm/GoWUVHuPAX8zbh3POXQPQyyDW4Ys+o3KXiUpIwSoYZQRDuwDbjWdIm4WEtWXfz5p6/BKKXQa7BnVXzr00lCaNkmBEE4Q5sNZ6TR0dffUO6k5kryT1/CUQvg0yD07NBqCVhlAwzgiDcga3GU2wSajixe1BxqnvOQnLPXwLRyyDb4PRsEGpJGCXDjCAId2C78ZxdyCbhYaI/Luc/u3PPXwLRyyDX4IoNQrH/OggoSRglw4ywFIQ91+uqzXe0YrsgLIapZMdN3Guvy9ttcs9fAtHLINPgNP1LU0nCKBlmBEEoLgjLnaNK9twA2hSrl9zzhwJKEkbJMCMIQnlBWPyTVdKeXmBBTurZMaomYZQMM4IgFBiExQTU/JsV0OQBVf/KVJIwSoYZsYggBIAFUpIwSoYZQRACgExKEkbJMCMIQgCQSUnCKBlmBEEIADIpSRglw4wgCAFAJiUJo2SYEQQhAMikJGGUDDOCIASwRNEfS8kxqoZEi2xTSoYZQRACWKI8uTbZqBoSLbJNKRlmBEEIYIny5Npko2pItMg2pWSYEQQhgCXKk2uTjaoh0SLblJJhRhCEAJYmT6ZtbLCOhItuE0qGGUEQAliaPHm2scE6Ei66TSgZZoSGIDy3t3fkVbkHAUCNPHm2scE6Ei66TSgZZoSGINx/6d7eY9XcOAVAbnnybGODdSRcdJtQMswIDUF48NBVe3vX5h4EAC2UdGaCUAoVQXhwhp2jAEZT0pkJQil0BOGjz2PnKICxlHRmglAKHUFYbBKycxTAOEo6M0EohZIgLM6Xecxbco8CgApKOjNBKIWSICw3CS/NPQgAKijpzAShFFqCsDhKyPkyAMZQ0pkJQim0BCGbhADGUtKZCUIp1ARh8VtCjhICGEFJZyYIpVAThMXpMpw4CmAEJZ2ZIJRCTRCW+0b5LSGAYUo6M0EohZ4gLPaNcroMgGFKOjNBKIWeICzOG2XfKIBhSjozQSiFniA8OMG+UQBjKOnMBKEUioKwOEjIvlEAg5R0ZoJQCkVBeO4wCPduzT0KAOIp6cwEoRSKgrA4W4aDhAAGKenMBKEUioKwPFuGi8sAGKKkMxOEUigKwvIn9ZwtA2CIks5MEEpBEAJYGiWdmSCUQlEQlr+f4HKjAIYo6cwEoRQEIYClUdKZCUIpCEIAS6OkMxOEUhCEAJZGSWcmCKUgCAEsjZLOTBBKoSgIOWsUwChKOjNBKAVBCGBplHRmglAKRUHIlWUAjKKkMxOEUigKQq41CmAUJZ2ZIJRCURBy9wkAoyjpzAShFIqC8AwnjQIYQ0lnJgilUBSE3KEewChKOjNBKIWeICzPleEQIYBBSjozQSiFniAsDhEeeVXuUQCQT0lnJgil0BOE7BkFMI6SzkwQSqEmCNkzCmAkJZ2ZIJRCTRCe45xRAOMo6cwEoRRqgvAEG4QAxlHSmQlCKbQEYbFnlA1CAGMo6cwEoRRagvAMG4QARlLSmQlCKZQEIRuEAEZT0pkJQimUBCEbhABGU9KZCUIpdARhsUHIbwgBjKOkMxOEUugIwjPcdwLAaEo6M0EohYogLO5EyB15AYykpDMThFKoCMIT7BgFMJ6SzkwQSqEhCM9xtW0AEyjpzAShFBqCEACmUNKZCUIpCEIAS6OkMxOEUhCEAJZGSWcmCKUgCAEsjZLOTBBKQRACWBolnZkglIIgBLA0SjozQSgFQQhgaZR0ZoJQCoIQwNIo6cwEoRQEIYClUdKZCUIpCEIAS6OkMxOEUhCEAJZGSWcmCKUgCAEsjZLOTBBKQRACWBolnZkglIIgBLA0SjozQSgFQQhgaZR0ZoJQCoIQwNIo6cwEoRQEIYClUdKZCUIpCEIAS6OkMxOEUhCEAJZGSWcmCKUgCAEsjZLOTBBKQRACWBolnZkglIIgBLA0SjozQSgFQQhgaZR0ZoJQCoIQwNIo6cwEoRQEIYClUdKZCUIpCEIAS6OkMxOEUhCEAJZGSWcmCKUgCAEsjZLOTBBKQRACWBolnZkglIIgBLA0SjozQSgFQQhgaZR0ZoJQCoIQwNIo6cwEoRQEIYClUdKZCUIpCEIArqM6jKoh0SLb1OAwl1KHeAQhAFe6LNvKqBoSLbJNDQ5zKXWIRxACcKXLsq2MqiHRItvU4DCXUod4BCEAV7os28qoGhItsk0NDnMpdYhHEAKopcuxWQzWkXDRbcJMHeIRhABq6TJsFoN1JFx0mzBTh3gEIYBaugybxWAdCRfdJszUIR5BCKCWLsNmMVhHwkW3CTN1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp6WhmAmQpdYhHEAKoKeloZgJkKXWIRxACqCnpaGYCZCl1iEcQAqgp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" width="90%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set_protocol</span>(<span class="fu">pt_pre</span>(<span class="dv">60</span>), <span class="fu">pt_wu</span>(<span class="dv">300</span>,<span class="dv">80</span>), <span class="fu">pt_steps</span>(<span class="dv">180</span>,<span class="dv">100</span>,<span class="dv">25</span>,<span class="dv">6</span>,<span class="dv">30</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    duration load</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1        60    0</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2       300   80</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3       180  100</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4        30    0</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5       180  125</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6        30    0</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7       180  150</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8        30    0</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9       180  175</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10       30    0</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 11      180  200</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 12       30    0</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 13      180  225</span></span></code></pre></div>
+</div>
+</div>
+<div id="bodymass" class="section level2">
+<h2>Modify body mass</h2>
+<p>The <code>spiro</code> package calculates parameters relative to body
+mass. Per default <code>spiro()</code> will look for information on body
+mass in the meta data of the original data file. If for some reason no
+or the wrong body mass is present in the raw data file,
+<code>bodymass</code> can be manually given as an argument in
+<code>spiro()</code> or with <code>add_bodymass()</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># set body mass as an argument in `spiro()`</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">spiro</span>(file, <span class="at">bodymass =</span> <span class="fl">68.3</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># set body mass using `add_weight()`</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">spiro</span>(file) </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="fu">add_bodymass</span>(t, <span class="fl">68.3</span>)</span></code></pre></div>
+</div>
+<div id="heart-rate" class="section level2">
+<h2>Work with external heart rate data</h2>
+<p>Some metabolic carts only offer complicated options for connecting
+them to heart rate monitors. If heart rate data was recorded by another
+kind of device (e.g. wrist watch), this data can be added within the
+<code>spiro()</code> call or by using <code>add_hr()</code>.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get example data file path</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>hpath <span class="ot">&lt;-</span> <span class="fu">spiro_example</span>(<span class="st">&quot;hr_ramp.tcx&quot;</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># add heart rate data within `spiro()`</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>h <span class="ot">&lt;-</span> <span class="fu">spiro</span>(file, <span class="at">hr_file =</span> hpath, <span class="at">hr_offset =</span> <span class="dv">0</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># add heart rate data with `add_hr()`</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>i <span class="ot">&lt;-</span> <span class="fu">spiro</span>(file)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>j <span class="ot">&lt;-</span> <span class="fu">add_hr</span>(i, <span class="at">hr_file =</span> hpath, <span class="at">hr_offset =</span> <span class="dv">0</span>)</span></code></pre></div>
+<p><code>add_hr()</code> will import the heart rate data from a .tcx
+file and attach it to the existing data set. You can manually set the
+starting point of the heart rate recording relative to the start of the
+gas exchange measures recording with the <code>hr_offset</code>
+argument.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
