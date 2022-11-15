@@ -62,7 +62,6 @@ spiro_plot <- function(data,
                        base_size = 13,
                        grid_args = list(),
                        ...) {
-
   # input validation for `which` argument
   if (!is.numeric(which) || !all(which %in% 1:9)) {
     stop("'which' must be a numeric vector containing integers between 1 and 9")
@@ -114,17 +113,7 @@ spiro_plot_VE <- function(data, smooth = "fz", base_size = 13, ...) {
     data = d,
     ggplot2::aes(x = d$t, y = d$VE, colour = "VE (l/min)")
   ) +
-    list(
-      if (!requireNamespace("ggborderline", quietly = TRUE)) {
-        ggplot2::geom_line(
-          size = 1, na.rm = TRUE
-        )
-      } else {
-        ggborderline::geom_borderline(
-          size = 1, na.rm = TRUE
-        )
-      }
-    ) +
+    plot_lines() +
     ggplot2::scale_colour_manual(values = "#003300") +
     ggplot2::labs(x = "Duration (s)", y = NULL) +
     theme_spiro(base_size, ...)
@@ -191,18 +180,8 @@ spiro_plot_HR <- function(data, smooth = "fz", base_size = 13, ...) {
   )
 
   ggplot2::ggplot(data = d_long, ggplot2::aes(x = d_long$t)) +
-    list(
-      if (!requireNamespace("ggborderline", quietly = TRUE)) {
-        ggplot2::geom_line(
-          ggplot2::aes(y = d_long$value, colour = d_long$measure),
-          size = 1, na.rm = TRUE
-        )
-      } else {
-        ggborderline::geom_borderline(
-          ggplot2::aes(y = d_long$value, colour = d_long$measure),
-          size = 1, na.rm = TRUE
-        )
-      }
+    plot_lines(
+      mapping = ggplot2::aes(y = d_long$value, colour = d_long$measure)
     ) +
     ggplot2::scale_colour_manual(values = c("red", "pink")) +
     list(
@@ -235,7 +214,8 @@ spiro_plot_VO2 <- function(data, smooth = "fz", base_size = 13, ...) {
 
   tl_data <- data.frame(
     time = data$time,
-    load = data$load
+    load = data$load,
+    load_scaled = data$load * yl[[1]]
   )
 
   # use raw breath time data if smoothing method is breath-based
@@ -273,32 +253,17 @@ spiro_plot_VO2 <- function(data, smooth = "fz", base_size = 13, ...) {
 
   ggplot2::ggplot(NULL) +
     ggplot2::geom_area(
-      data = tl_data,
-      ggplot2::aes_(x = tl_data$time, y = tl_data$load * yl[[1]]),
+      data = NULL,
+      ggplot2::aes(x = tl_data$time, y = tl_data$load_scaled),
       fill = "black", alpha = 0.2, position = "identity"
     ) +
-    list(
-      if (!requireNamespace("ggborderline", quietly = TRUE)) {
-        ggplot2::geom_line(
-          data = v_data_long,
-          ggplot2::aes(
-            x = v_data_long$time,
-            y = v_data_long$value,
-            colour = v_data_long$measure
-          ),
-          size = 1, na.rm = TRUE
-        )
-      } else {
-        ggborderline::geom_borderline(
-          data = v_data_long,
-          ggplot2::aes(
-            x = v_data_long$time,
-            y = v_data_long$value,
-            colour = v_data_long$measure
-          ),
-          size = 1, na.rm = TRUE
-        )
-      }
+    plot_lines(
+      data = v_data_long,
+      mapping = ggplot2::aes(
+        x = v_data_long$time,
+        y = v_data_long$value,
+        colour = v_data_long$measure
+      )
     ) +
     ggplot2::scale_y_continuous(
       sec.axis = ggplot2::sec_axis(~ . / yl[[1]],
@@ -389,10 +354,21 @@ spiro_plot_vslope <- function(data, base_size = 13, ...) {
 #'
 #' @noRd
 spiro_plot_EQ <- function(data, smooth = "fz", base_size = 13, ...) {
-  d <- spiro_smooth(data, smooth = smooth, columns = c("VO2", "VCO2", "VE"))
+  # use calculated EQ data for smoothing if measurement method is not
+  # breath-by-breath
+  if (check_bb(attr(data, "raw")$time)) {
+    d <- spiro_smooth(data, smooth = smooth, columns = c("VO2", "VCO2", "VE"))
+    d$EQ_O2 <- 1000 * d$VE / d$VO2
+    d$EQ_CO2 <- 1000 * d$VE / d$VCO2
+  } else {
+    data$EQ_O2 <- 1000 * data$VE / data$VO2
+    data$EQ_CO2 <- 1000 * data$VE / data$VCO2
+    d <- spiro_smooth(data, smooth = smooth, columns = c("EQ_O2", "EQ_CO2"))
+    # Remove implausible values
+    d$EQ_O2[which(d$EQ_O2 > 50 | d$EQ_O2 < 10)] <- NA
+    d$EQ_CO2[which(d$EQ_CO2 > 50 | d$EQ_CO2 < 10)] <- NA
+  }
 
-  d$EQ_O2 <- 1000 * d$VE / d$VO2
-  d$EQ_CO2 <- 1000 * d$VE / d$VCO2
   # use raw breath time data if smoothing method is breath-based
   if (nrow(attr(data, "raw")) == nrow(d)) {
     d$t <- attr(data, "raw")$time
@@ -415,18 +391,8 @@ spiro_plot_EQ <- function(data, smooth = "fz", base_size = 13, ...) {
   d_long$measure <- factor(d_long$measure, levels = c("EQ_O2", "EQ_CO2"))
 
   ggplot2::ggplot(data = d_long, ggplot2::aes(x = d_long$t)) +
-    list(
-      if (!requireNamespace("ggborderline", quietly = TRUE)) {
-        ggplot2::geom_line(
-          ggplot2::aes(y = d_long$value, colour = d_long$measure),
-          size = 1, na.rm = TRUE
-        )
-      } else {
-        ggborderline::geom_borderline(
-          ggplot2::aes(y = d_long$value, colour = d_long$measure),
-          size = 1, na.rm = TRUE
-        )
-      }
+    plot_lines(
+      mapping = ggplot2::aes(y = d_long$value, colour = d_long$measure)
     ) +
     ggplot2::scale_colour_manual(values = c("#c00000", "#0053a4")) +
     ggplot2::scale_y_continuous(limits = function(x) c(x[[1]] - 5, x[[2]])) +
@@ -456,8 +422,15 @@ spiro_plot_vent <- function(data, base_size = 13, ...) {
 #'
 #' @noRd
 spiro_plot_RER <- function(data, smooth = "fz", base_size = 13, ...) {
-  d <- spiro_smooth(data, smooth = smooth, columns = c("VO2", "VCO2"))
-  d$RER <- d$VCO2 / d$VO2
+  # use calculated RER data for smoothing if measurement method is not
+  # breath-by-breath
+  if (check_bb(attr(data, "raw")$time)) {
+    d <- spiro_smooth(data, smooth = smooth, columns = c("VO2", "VCO2"))
+    d$RER <- d$VCO2 / d$VO2
+  } else {
+    d <- spiro_smooth(data, smooth = smooth, columns = "RER")
+  }
+
   # use raw breath time data if smoothing method is breath-based
   if (nrow(attr(data, "raw")) == nrow(d)) {
     d$t <- attr(data, "raw")$time
@@ -466,19 +439,7 @@ spiro_plot_RER <- function(data, smooth = "fz", base_size = 13, ...) {
   }
 
   ggplot2::ggplot(data = d, ggplot2::aes(x = d$t)) +
-    list(
-      if (!requireNamespace("ggborderline", quietly = TRUE)) {
-        ggplot2::geom_line(
-          ggplot2::aes(y = d$RER, colour = "RER"),
-          size = 1, na.rm = TRUE
-        )
-      } else {
-        ggborderline::geom_borderline(
-          ggplot2::aes(y = d$RER, colour = "RER"),
-          size = 1, na.rm = TRUE
-        )
-      }
-    ) +
+    plot_lines(mapping = ggplot2::aes(y = d$RER, colour = "RER")) +
     ggplot2::scale_colour_manual(values = "#003300") +
     ggplot2::labs(x = "Duration (s)", y = NULL) +
     theme_spiro(base_size, ...)
@@ -493,13 +454,13 @@ spiro_plot_Pet <- function(data, smooth = "fz", base_size = 13, ...) {
 
     # use raw breath time data if smoothing method is breath-based
     if (nrow(attr(data, "raw")) == nrow(d)) {
-      d$t <- attr(data, "raw")$time
+      d$time <- attr(data, "raw")$time
     } else {
-      d$t <- data$time
+      d$time <- data$time
     }
   } else {
     d <- data.frame(
-      t = data$time,
+      time = data$time,
       # returns error if NAs are interpreted as logical
       PetO2 = as.numeric(NA),
       PetCO2 = as.numeric(NA)
@@ -514,7 +475,7 @@ spiro_plot_Pet <- function(data, smooth = "fz", base_size = 13, ...) {
     direction = "long",
     varying = c("PetO2", "PetCO2"),
     v.names = "value",
-    idvar = c("t"),
+    idvar = c("time"),
     times = c("PetO2", "PetCO2"),
     timevar = "measure"
   )
@@ -523,19 +484,9 @@ spiro_plot_Pet <- function(data, smooth = "fz", base_size = 13, ...) {
     labels = c("PetO2 (mmHG)", "PetCO2 (mmHg)")
   )
 
-  ggplot2::ggplot(data = d_long, ggplot2::aes(x = d_long$t)) +
-    list(
-      if (!requireNamespace("ggborderline", quietly = TRUE)) {
-        ggplot2::geom_line(
-          ggplot2::aes(y = d_long$value, colour = d_long$measure),
-          size = 1, na.rm = TRUE
-        )
-      } else {
-        ggborderline::geom_borderline(
-          ggplot2::aes(y = d_long$value, colour = d_long$measure),
-          size = 1, na.rm = TRUE
-        )
-      }
+  ggplot2::ggplot(data = d_long, ggplot2::aes(x = d_long$time)) +
+    plot_lines(
+      mapping = ggplot2::aes(y = d_long$value, colour = d_long$measure)
     ) +
     ggplot2::scale_colour_manual(values = c("#c00000", "#0053a4")) +
     ggplot2::scale_y_continuous(limits = c(0, 150)) +
@@ -587,5 +538,58 @@ theme_spiro <- function(base_size = 13,
       legend.justification = legend.justification,
       ...
     )
+  )
+}
+
+#' Plot lines in spiro_plot() functions depending on ggborderline availability
+#' and ggplot2 version
+#'
+#' Uses the ggborderline package if available to plot lines. Use the linewidth
+#' aesthetic for ggplot2 version >= 3.4 and size aesthetic for older versions
+#'
+#' @param data Passed to ggplot2::geom_line() or ggborderline::geom_borderline()
+#' @param mapping Passed to ggplot2::geom_line() or
+#'   ggborderline::geom_borderline()
+#' @param linewidth Passed as linewidth or size depending on the available
+#'   ggplot2 version. Defaults to 1.
+#' @param na.rm Passed to ggplot2::geom_line() or
+#'   ggborderline::geom_borderline(). Defaults to TRUE.
+#'
+#' @noRd
+plot_lines <- function(data = NULL, mapping = NULL, linewidth = 1, na.rm = TRUE) {
+  list(
+    if (!requireNamespace("ggborderline", quietly = TRUE)) {
+      if (utils::packageVersion("ggplot2") >= 3.4) {
+        ggplot2::geom_line(
+          data = data,
+          mapping = mapping,
+          linewidth = linewidth,
+          na.rm = na.rm
+        )
+      } else {
+        ggplot2::geom_line(
+          data = data,
+          mapping = mapping,
+          size = linewidth,
+          na.rm = na.rm
+        )
+      }
+    } else {
+      if (utils::packageVersion("ggplot2") >= 3.4) {
+        ggborderline::geom_borderline(
+          data = data,
+          mapping = mapping,
+          linewidth = linewidth,
+          na.rm = na.rm
+        )
+      } else {
+        ggborderline::geom_borderline(
+          data = data,
+          mapping = mapping,
+          size = linewidth,
+          na.rm = na.rm
+        )
+      }
+    }
   )
 }

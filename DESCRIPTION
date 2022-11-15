@@ -1,6 +1,6 @@
 Package: spiro
 Title: Manage Data from Cardiopulmonary Exercise Testing
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: 
     c(
       person(given = "Simon",
@@ -30,7 +30,7 @@ Suggests: testthat (>= 3.0.0), rmarkdown, ggborderline
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2022-08-25 11:45:52 UTC; Simon
+Packaged: 2022-11-13 20:02:37 UTC; Simon
 Author: Simon Nolte [aut, cre] (<https://orcid.org/0000-0003-1643-1860>),
   Manuel Ramon [rev] (reviewed the package (v. 0.0.5) for rOpenSci, see
     <https://github.com/ropensci/software-review/issues/541>),
@@ -38,4 +38,4 @@ Author: Simon Nolte [aut, cre] (<https://orcid.org/0000-0003-1643-1860>),
     <https://github.com/ropensci/software-review/issues/541>)
 Maintainer: Simon Nolte <s.nolte@dshs-koeln.de>
 Repository: CRAN
-Date/Publication: 2022-08-26 07:50:02 UTC
+Date/Publication: 2022-11-15 20:40:02 UTC

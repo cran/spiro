@@ -37,18 +37,17 @@ different metabolic carts.
 
 ## Installation
 
-Install the current development version from GitHub:
+Install `spiro` from CRAN:
+
+``` r
+install.packages("spiro")
+```
+
+Install the current development version of `spiro` from GitHub:
 
 ``` r
 if (!require(remotes)) install.packages("remotes")
 remotes::install_github("ropensci/spiro")
-```
-
-Install the latest version 0.1.0 release by running this code:
-
-``` r
-if (!require(remotes)) install.packages("remotes")
-remotes::install_github("ropensci/spiro@v0.1.0")
 ```
 
 ## Usage
@@ -140,7 +139,7 @@ citation("spiro")
 #> To cite spiro in publications use:
 #> 
 #>   Simon Nolte (2022). spiro: Manage Data from Cardiopulmonary Exercise
-#>   Testing. R package version 0.1.0. DOI: 10.5281/zenodo.1040727.
+#>   Testing. R package version 0.1.1. DOI: 10.5281/zenodo.1040727.
 #>   https://docs.ropensci.org/spiro
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -151,7 +150,7 @@ citation("spiro")
 #>     year = {2022},
 #>     url = {https://docs.ropensci.org/spiro/},
 #>     doi = {10.5281/zenodo.5816170},
-#>     note = {R package version 0.1.0},
+#>     note = {R package version 0.1.1},
 #>   }
 ```
 
@@ -164,8 +163,9 @@ testing. It additionally offers functions for analyzing VO2 kinetics.
 ## Acknowledgment
 
 The following persons contributed to this package by providing raw data
-files: Daniel Appelhans, Sebastian Mühlenhoff, Yannick Schwarz, Adrian
-Swoboda, Andreas Wagner.
+files, reviewing code and/or suggesting features: Daniel Appelhans,
+James Hunter, Virgile Lecoultre, Sebastian Mühlenhoff, Manuel Ramon,
+Yannick Schwarz, Adrian Swoboda, Andreas Wagner.
 
 ## Contributing
 
