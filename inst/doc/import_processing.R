@@ -35,12 +35,12 @@ spiro(file)
 #    add_protocol(protocol) |>
 #    add_hr(hr_file = spiro_example("hr_ramp.tcx"), hr_offset = 0)
 
-## ----import-------------------------------------------------------------------
-spiro_import(file, device = NULL)
+## ----raw----------------------------------------------------------------------
+spiro_raw(file, device = NULL, anonymize = TRUE)
 
-## ----attr, eval=FALSE---------------------------------------------------------
+## ----raw2, eval=FALSE---------------------------------------------------------
 #  s <- spiro(file)
-#  attr(s,"raw")
+#  spiro_raw(s)
 
 ## ----protocol-----------------------------------------------------------------
 s <- spiro(file)
@@ -73,18 +73,37 @@ path <- data.frame(
   )
 )
 ggplot() +
-  geom_segment(
-    aes(x = 0, xend = 0.95, y = 0, yend = 0),
-    colour = "grey", 
-    size = 1
-  ) +
-  geom_path(
-    aes(x = x, y = y, colour = type), 
-    data = path, 
-    size = 1, 
-    group = TRUE, 
-    show.legend = FALSE
-  ) +
+  (if (utils::packageVersion("ggplot2") >= 3.4) {
+    list(
+      geom_segment(
+        aes(x = 0, xend = 0.95, y = 0, yend = 0),
+        colour = "grey", 
+        linewidth = 1
+      ),
+      geom_path(
+        aes(x = x, y = y, colour = type), 
+        data = path, 
+        linewidth = 1, 
+        group = TRUE, 
+        show.legend = FALSE
+      )
+    )
+  } else {
+    list(
+      geom_segment(
+        aes(x = 0, xend = 0.95, y = 0, yend = 0),
+        colour = "grey", 
+        size = 1
+      ),
+      geom_path(
+        aes(x = x, y = y, colour = type), 
+        data = path, 
+        size = 1, 
+        group = TRUE, 
+        show.legend = FALSE
+      )
+    )
+  }) +
   annotate(
     "text", 
     x = c(0.03,0.05,0.05,0.05,0.03), y = c(0.98,0.91,0.84,0.77,0.70), 

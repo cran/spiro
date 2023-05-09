@@ -10,7 +10,7 @@ state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/spiro)](https://CRAN.R-project.org/package=spiro)
-[![DOI](https://zenodo.org/badge/354232342.svg)](https://zenodo.org/badge/latestdoi/354232342)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.05089/status.svg)](https://doi.org/10.21105/joss.05089)
 [![R-CMD-check](https://github.com/ropensci/spiro/workflows/R-CMD-check/badge.svg)](https://github.com/ropensci/spiro/actions)
 [![codecov](https://codecov.io/gh/ropensci/spiro/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ropensci/spiro)
 [![Status at rOpenSci Software Peer
@@ -54,32 +54,32 @@ remotes::install_github("ropensci/spiro")
 
 Main functions:
 
--   Use `spiro()` to automatically import and process raw data from
-    cardiopulmonary exercise testing.
--   Use `spiro_summary()` for a summary of cardiopulmonary parameters
-    (e.g., relative oxygen uptake, respiratory quotient, heart rate, …)
-    for each load step.
--   Use `spiro_max()` to calculate maximum parameter values (e.g.,
-    VO2max).
--   Use `spiro_plot()` to visualize the data as a modifiable Wassermann
-    9-Panel Plot.
+- Use `spiro()` to automatically import and process raw data from
+  cardiopulmonary exercise testing.
+- Use `spiro_summary()` for a summary of cardiopulmonary parameters
+  (e.g., relative oxygen uptake, respiratory quotient, heart rate, …)
+  for each load step.
+- Use `spiro_max()` to calculate maximum parameter values (e.g.,
+  VO2max).
+- Use `spiro_plot()` to visualize the data as a modifiable Wassermann
+  9-Panel Plot.
 
 Further functionality:
 
--   Add external heart rate data from a .tcx file.
--   Automated guessing or manual setting of exercise protocols.
--   Different data filtering strategies for VO<sub>2max</sub>
-    determination (moving time averages, moving breath averages,
-    Butterworth filters)
+- Add external heart rate data from a .tcx file.
+- Automated guessing or manual setting of exercise protocols.
+- Different data filtering strategies for VO<sub>2max</sub>
+  determination (moving time averages, moving breath averages,
+  Butterworth filters)
 
 #### Metabolic Carts
 
 The following metabolic carts are currently supported by `spiro`:
 
--   Cortex
--   Cosmed
--   Vyntus
--   ZAN
+- Cortex
+- Cosmed
+- Vyntus
+- ZAN
 
 Support for further metabolic carts is planned for future releases.
 
@@ -138,19 +138,22 @@ citation("spiro")
 #> 
 #> To cite spiro in publications use:
 #> 
-#>   Simon Nolte (2022). spiro: Manage Data from Cardiopulmonary Exercise
-#>   Testing. R package version 0.1.1. DOI: 10.5281/zenodo.1040727.
-#>   https://docs.ropensci.org/spiro
+#>   Simon Nolte (2023). spiro: An R package for analyzing data from
+#>   cardiopulmonary exercise testing. Journal of Open Source Software,
+#>   8(81), 5089, https://doi.org/10.21105/joss.05089
 #> 
 #> A BibTeX entry for LaTeX users is
 #> 
-#>   @Manual{,
-#>     title = {spiro: Manage Data from Cardiopulmonary Exercise Testing},
+#>   @Article{,
+#>     title = {spiro: An R package for analyzing data from cardiopulmonary exercise testing},
 #>     author = {Simon Nolte},
-#>     year = {2022},
-#>     url = {https://docs.ropensci.org/spiro/},
-#>     doi = {10.5281/zenodo.5816170},
-#>     note = {R package version 0.1.1},
+#>     year = {2023},
+#>     volume = {8},
+#>     number = {81},
+#>     pages = {5089},
+#>     journal = {Journal of Open Source Software},
+#>     url = {https://joss.theoj.org/papers/10.21105/joss.05089},
+#>     doi = {10.21105/joss.05089},
 #>   }
 ```
 
@@ -165,7 +168,7 @@ testing. It additionally offers functions for analyzing VO2 kinetics.
 The following persons contributed to this package by providing raw data
 files, reviewing code and/or suggesting features: Daniel Appelhans,
 James Hunter, Virgile Lecoultre, Sebastian Mühlenhoff, Manuel Ramon,
-Yannick Schwarz, Adrian Swoboda, Andreas Wagner.
+Anton Schiffer, Yannick Schwarz, Adrian Swoboda, Andreas Wagner.
 
 ## Contributing
 

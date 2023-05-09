@@ -21,6 +21,7 @@ RER
 RERmax
 Rda
 Robergs
+Schiffer
 Schwarz
 Swoboda
 VCO
@@ -38,10 +39,11 @@ anonymization
 anonymize
 anonymized
 anonymizes
+args
+attr
 bodymass
 codecov
 const
-cowplot
 dat
 deanonymize
 doi
@@ -55,9 +57,8 @@ pre
 pts
 rOpenSci
 spiroergometric
-spiroergometry
 tcx
-timespan
+vdiffr
 whippr
 wu
 xls

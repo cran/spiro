@@ -34,11 +34,24 @@ spiro_plot(data)
 # Plot only V-Slope (Panel 5) and VO2/VCO2 over time (Panel 3)
 spiro_plot(data, which = c(5,3))
 
-## ----spiro_plot-style, fig.width = 10, fig.height = 8, message = FALSE--------
+## ----spiro_plot-style-1, fig.width = 10, fig.height = 8, message = FALSE------
+# Change size of points, width of lines and color of VO2 points/lines
+spiro_plot(
+  data, 
+  style_args = list(
+    size = 1,
+    linewidth = 2,
+    color_VO2 = "black"
+  )
+)
+
+## ----spiro_plot-style-2, fig.width = 10, fig.height = 8, message = FALSE------
 # Change base size and axis label font
 spiro_plot(
   data, 
   base_size = 9, 
-  axis.title = ggplot2::element_text(face = "italic", colour = "blue")
+  style_args = list(
+    axis.title = ggplot2::element_text(face = "italic", colour = "blue")
+  )
 )
 
