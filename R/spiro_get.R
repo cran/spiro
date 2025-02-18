@@ -58,7 +58,7 @@ spiro_get <- function(file, device = NULL, anonymize = TRUE) {
 #' @noRd
 guess_device <- function(file) {
   if (grepl("\\.xls$", file, ignore.case = TRUE) ||
-      grepl("\\.xlsx$", file, ignore.case = TRUE)) { # Excel file
+    grepl("\\.xlsx$", file, ignore.case = TRUE)) { # Excel file
     # Read head of the Excel file
     head <- readxl::read_excel(file, range = "A1:B8", col_names = c("V1", "V2"))
 
@@ -89,14 +89,14 @@ guess_device <- function(file) {
     }
   } else { # non-Excel file
     # read the first rows of the file
-    head <- utils::read.delim(file, header = FALSE, nrows = 5)
+    head <- utils::read.delim(file, header = FALSE, nrows = 5, encoding = "latin1")
     # remove leading or trailing white spaces that may occur in some Vyntus
     # files
     head <- apply(head, 2, trimws)
     # files from ZAN devices usually start with a line "[person]"
     if (any(head == "[person]")) {
       device <- "zan"
-    } else if (any(head == "Tid" | head == "Temps" | head == "Zeit")) {
+    } else if (any(head == "Tid" | head == "Temps" | head == "Zeit" | head == "Time" | head == "t-ph" | head == "t")) {
       device <- "vyntus"
     } else {
       device <- "none"
@@ -113,7 +113,7 @@ guess_device <- function(file) {
 #' @noRd
 spiro_get_zan <- function(file) {
   # find indices for document structure
-  rawdata <- utils::read.delim(file, header = FALSE, blank.lines.skip = FALSE)
+  rawdata <- utils::read.delim(file, header = FALSE, blank.lines.skip = FALSE, encoding = "latin1")
   meta_imin <- which(rawdata == "[person]") # meta data
   cnames_imin <- which(rawdata == "[parameter]") # column names
   data_imin <- which(rawdata == "[Data]") # raw data
@@ -125,7 +125,8 @@ spiro_get_zan <- function(file) {
     skip = meta_imin,
     nrows = cnames_imin - meta_imin - 3,
     row.names = 1,
-    blank.lines.skip = FALSE
+    blank.lines.skip = FALSE,
+    encoding = "latin1"
   )
   meta_df <- data.frame(t(meta))
   info <- data.frame(
@@ -143,16 +144,21 @@ spiro_get_zan <- function(file) {
   cnames <- utils::read.csv(file,
     header = FALSE,
     skip = cnames_imin + 2,
-    nrows = data_imin - cnames_imin - 4
+    nrows = data_imin - cnames_imin - 4,
+    encoding = "latin1"
   )$V3
   # remove last column due to encoding problems
   cnames <- cnames[-length(cnames)]
+  # remove empty name entries
+  # these may be additional parameter values instead of column names
+  cnames <- cnames[!cnames == ""]
 
   # import the main data
   data <- utils::read.csv(file,
     header = FALSE,
     skip = data_imin,
-    col.names = c("index", cnames, "fan")
+    col.names = c("index", cnames, "fan"),
+    encoding = "latin1"
   )
 
   # extract data with metabolic exchange parameters from data.
@@ -260,7 +266,7 @@ spiro_get_cosmed <- function(file) {
       load_data <- load_data / 10
     }
   } else { # no velocity data available
-    load_data <- get_data(data, "Power")
+    load_data <- get_data(data, c("Power", "Last"))
   }
 
   # Check if time data import worked
@@ -417,7 +423,7 @@ spiro_get_vyntus <- function(file) {
   head_rm <- as.data.frame(apply(head, 2, trimws))
 
   colstart <- which(
-    head_rm == "Tid" | head_rm == "Temps" | head_rm == "Zeit",
+    head_rm == "Tid" | head_rm == "Temps" | head_rm == "Zeit" | head_rm == "Time" | head_rm == "t-ph" | head_rm == "t",
     arr.ind = TRUE
   )
 
@@ -433,15 +439,15 @@ spiro_get_vyntus <- function(file) {
 
   df <- data.frame(
     time = to_seconds(
-      get_data(data_mod, c("Tid", "Temps", "Zeit"), as_numeric = FALSE)
+      get_data(data_mod, c("Tid", "Time", "Temps", "Zeit", "t.ph", "t"), as_numeric = FALSE)
     ),
     VO2 = get_data(data_mod, "V.O2"),
     VCO2 = get_data(data_mod, "V.CO2"),
     RR = get_data(data_mod, c("BF", "FR")),
     VT = get_data(data_mod, "VTex"),
     VE = get_data(data_mod, c("V.E", "VeSTPD")),
-    HR = get_data(data_mod, c("HF", "FC")),
-    load = get_data(data_mod, c("Last", "Vitesse", "Watt")),
+    HR = get_data(data_mod, c("HR", "HF", "FC")),
+    load = get_data(data_mod, c("Load", "Last", "Vitesse", "Watt")),
     PetO2 = get_data(data_mod, "PETO2") * 7.50062, # convert from kPa to mmHg
     PetCO2 = get_data(data_mod, "PETCO2") * 7.50062 # convert from kPa to mmHg
   )
